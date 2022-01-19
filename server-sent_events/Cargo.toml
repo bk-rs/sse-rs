@@ -13,3 +13,5 @@ categories = []
 readme = "README.md"
 
 [dependencies]
+http = { version = "0.2", default-features = false, optional = true }
+mime = { version = "0.3", default-features = false, optional = true }
