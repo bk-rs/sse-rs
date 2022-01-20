@@ -1,56 +1,53 @@
 use core::fmt;
-use std::borrow::Cow;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct Event<'a> {
+pub struct Event {
     //
-    pub annotation: Option<Cow<'a, str>>,
+    pub annotation: Option<Box<str>>,
     //
     pub retry: Option<usize>,
     //
-    pub id: Option<Cow<'a, str>>,
-    pub r#type: Option<Cow<'a, str>>,
-    pub data: Option<EventData<'a>>,
+    pub id: Option<Box<str>>,
+    pub r#type: Option<Box<str>>,
+    pub data: Option<EventData>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum EventData<'a> {
-    Line(Cow<'a, str>),
-    Lines(Vec<Cow<'a, str>>),
+pub enum EventData {
+    Line(Box<str>),
+    Lines(Vec<Box<str>>),
 }
 
-impl<'a> Event<'a> {
-    pub fn new(
-        data: &'a str,
+impl Event {
+    pub fn new<'a>(
+        data: &str,
         r#type: impl Into<Option<&'a str>>,
         id: impl Into<Option<&'a str>>,
     ) -> Self {
         Self {
-            id: id.into().map(Cow::Borrowed),
-            r#type: r#type.into().map(Cow::Borrowed),
-            data: Some(EventData::Line(Cow::Borrowed(data))),
+            id: id.into().map(Into::into),
+            r#type: r#type.into().map(Into::into),
+            data: Some(EventData::Line(data.into())),
             ..Default::default()
         }
     }
 
-    pub fn with_multiline_data(
-        data: Vec<&'a str>,
+    pub fn with_multiline_data<'a>(
+        data: Vec<&str>,
         r#type: impl Into<Option<&'a str>>,
         id: impl Into<Option<&'a str>>,
     ) -> Self {
         Self {
-            id: id.into().map(Cow::Borrowed),
-            r#type: r#type.into().map(Cow::Borrowed),
-            data: Some(EventData::Lines(
-                data.into_iter().map(Cow::Borrowed).collect(),
-            )),
+            id: id.into().map(Into::into),
+            r#type: r#type.into().map(Into::into),
+            data: Some(EventData::Lines(data.into_iter().map(Into::into).collect())),
             ..Default::default()
         }
     }
 
-    pub fn with_annotation(annotation: &'a str) -> Self {
+    pub fn with_annotation(annotation: &str) -> Self {
         Self {
-            annotation: Some(Cow::Borrowed(annotation)),
+            annotation: Some(annotation.into()),
             ..Default::default()
         }
     }
@@ -63,7 +60,7 @@ impl<'a> Event<'a> {
     }
 }
 
-impl<'a> fmt::Display for Event<'a> {
+impl fmt::Display for Event {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(annotation) = &self.annotation {
             writeln!(f, ": {}", annotation)?;
