@@ -31,5 +31,8 @@ futures-util = { version = "0.3", default-features = false, features = ["std"], 
 futures-stream-select-ext = { version = "0.1", default-features = false, features = ["std"], optional = true }
 async-timer = { version = "1.0.0-beta", default-features = false, optional = true }
 
+[dev-dependencies]
+futures-executor = { version = "0.3" }
+
 [package.metadata.cargo-all-features]
 skip_optional_dependencies = true
