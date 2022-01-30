@@ -7,4 +7,8 @@ pub mod event;
 pub use event::Event;
 
 //
+#[cfg(feature = "stream")]
+pub mod stream;
+
+//
 pub mod utils;

@@ -12,6 +12,24 @@ keywords = []
 categories = []
 readme = "README.md"
 
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = ["stream"]
+
+stream = ["futures-util", "futures-stream-select-ext", "async-timer"]
+
+_priv_test_http = ["http"]
+_priv_test_mime = ["mime"]
+
 [dependencies]
 http = { version = "0.2", default-features = false, optional = true }
 mime = { version = "0.3", default-features = false, optional = true }
+
+futures-util = { version = "0.3", default-features = false, features = ["std"], optional = true }
+futures-stream-select-ext = { version = "0.1", default-features = false, features = ["std"], optional = true }
+async-timer = { version = "1.0.0-beta", default-features = false, optional = true }
+
+[package.metadata.cargo-all-features]
+skip_optional_dependencies = true
