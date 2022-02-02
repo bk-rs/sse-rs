@@ -1,3 +1,5 @@
+pub mod sleep;
+
 //
 #[cfg(any(feature = "stream_sleep_tokio", feature = "stream_sleep_async_timer"))]
 pub fn keep_alive_stream<EVENT, S>(
@@ -14,15 +16,7 @@ where
 
     let st2 = stream::iter(0..usize::MAX)
         .then(move |i| async move {
-            cfg_if::cfg_if! {
-                if #[cfg(feature = "stream_sleep_tokio")] {
-                    tokio::time::sleep(tokio::time::Duration::from_secs(interval.as_secs())).await;
-                } else if #[cfg(feature = "stream_sleep_async_timer")] {
-                    async_timer::interval(interval).wait().await;
-                } else {
-                    unreachable!()
-                }
-            }
+            self::sleep::sleep(interval).await;
             i
         })
         .map(|i| format!(": {}\n\n", i));
@@ -35,7 +29,10 @@ mod tests {
     #[allow(unused_imports)]
     use super::*;
 
-    #[cfg(feature = "stream_sleep_tokio")]
+    #[cfg(all(
+        feature = "stream_sleep_tokio",
+        not(feature = "stream_sleep_async_timer")
+    ))]
     #[tokio::test]
     async fn test_keep_alive_stream_with_sleep_tokio() {
         use core::time::Duration;
