@@ -6,7 +6,7 @@ pub mod sleep;
 #[cfg(any(feature = "stream_sleep_tokio", feature = "stream_sleep_async_timer"))]
 pub fn keep_alive_stream<EVENT, S>(
     inner: S,
-    interval: core::time::Duration,
+    interval: Duration,
 ) -> impl futures_util::Stream<Item = String>
 where
     EVENT: std::string::ToString,
@@ -85,8 +85,6 @@ mod tests {
     ))]
     #[tokio::test]
     async fn test_keep_alive_stream_with_sleep_tokio() {
-        use core::time::Duration;
-
         use futures_util::{stream, StreamExt as _};
 
         //
