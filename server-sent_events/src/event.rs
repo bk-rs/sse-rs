@@ -3,7 +3,7 @@ use core::fmt;
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Event {
     //
-    pub annotation: Option<Box<str>>,
+    pub comment: Option<Box<str>>,
     //
     pub retry: Option<usize>,
     //
@@ -45,9 +45,9 @@ impl Event {
         }
     }
 
-    pub fn with_annotation(annotation: &str) -> Self {
+    pub fn with_comment(comment: &str) -> Self {
         Self {
-            annotation: Some(annotation.into()),
+            comment: Some(comment.into()),
             ..Default::default()
         }
     }
@@ -62,8 +62,8 @@ impl Event {
 
 impl fmt::Display for Event {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Some(annotation) = &self.annotation {
-            writeln!(f, ": {}", annotation)?;
+        if let Some(comment) = &self.comment {
+            writeln!(f, ": {}", comment)?;
         }
 
         if let Some(retry) = &self.retry {
@@ -108,7 +108,7 @@ mod tests {
     #[test]
     fn test_to_string() {
         assert_eq!(
-            Event::with_annotation("This is a comment")
+            Event::with_comment("This is a comment")
                 .to_string()
                 .as_bytes(),
             b": This is a comment\n\n"
