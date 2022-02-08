@@ -16,11 +16,9 @@ readme = "README.md"
 all-features = true
 
 [features]
-default = ["stream", "stream_sleep_tokio"]
+default = ["stream"]
 
-stream = ["futures-util", "futures-stream-select-ext", "cfg-if"]
-stream_sleep_tokio = ["tokio/time"]
-stream_sleep_async_timer = ["async-timer"]
+stream = ["futures-util", "futures-stream-select-ext", "async-interval"]
 
 _priv_test_http = ["http"]
 _priv_test_mime = ["mime"]
@@ -31,25 +29,18 @@ mime = { version = "0.3", default-features = false, optional = true }
 
 futures-util = { version = "0.3", default-features = false, features = ["std"], optional = true }
 futures-stream-select-ext = { version = "0.1", default-features = false, features = ["std"], optional = true }
-cfg-if = { version = "1.0", default-features = false, optional = true }
-
-tokio = { version = "1.16", default-features = false, optional = true }
-async-timer = { version = "1.0.0-beta", default-features = false, optional = true }
+async-interval = { version = "0.1", default-features = false, optional = true }
 
 [dev-dependencies]
 futures-executor = { version = "0.3" }
-tokio = { version = "1.16", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.16", features = ["macros", "rt-multi-thread", "time"] }
+async-interval = { version = "0.1", default-features = false, features = ["impl_tokio"] }
 
 [package.metadata.cargo-all-features]
 skip_optional_dependencies = true
 skip_feature_sets = [
-    ["stream_sleep_tokio", "stream_sleep_async_timer"],
     # 
     ["_priv_test_http", "stream"],
-    ["_priv_test_http", "stream_sleep_tokio"],
-    ["_priv_test_http", "stream_sleep_async_timer"],
     # 
     ["_priv_test_mime", "stream"],
-    ["_priv_test_mime", "stream_sleep_tokio"],
-    ["_priv_test_mime", "stream_sleep_async_timer"],
 ]

@@ -1,43 +1,39 @@
 use core::time::Duration;
+use std::string;
 
-pub mod sleep;
+use async_interval::{intervalable_iter_stream, Intervalable};
+use futures_util::{Stream, StreamExt as _};
 
 //
-#[cfg(any(feature = "stream_sleep_tokio", feature = "stream_sleep_async_timer"))]
-pub fn keep_alive_stream<EVENT, S>(
+pub fn keep_alive_stream<EVENT, S, INTVL>(
     inner: S,
     interval: Duration,
-) -> impl futures_util::Stream<Item = String>
+) -> impl Stream<Item = String>
 where
-    EVENT: std::string::ToString,
-    S: futures_util::Stream<Item = EVENT> + Send + 'static,
+    EVENT: string::ToString,
+    S: Stream<Item = EVENT> + Send + 'static,
+    INTVL: Intervalable + Send + 'static,
 {
     let option = KeepAliveOption::new().interval(interval);
 
-    keep_alive_stream_with_option(inner, option)
+    keep_alive_stream_with_option::<_, _, INTVL>(inner, option)
 }
 
-#[cfg(any(feature = "stream_sleep_tokio", feature = "stream_sleep_async_timer"))]
-pub fn keep_alive_stream_with_option<EVENT, S>(
+pub fn keep_alive_stream_with_option<EVENT, S, INTVL>(
     inner: S,
     option: KeepAliveOption,
-) -> impl futures_util::Stream<Item = String>
+) -> impl Stream<Item = String>
 where
-    EVENT: std::string::ToString,
-    S: futures_util::Stream<Item = EVENT> + Send + 'static,
+    EVENT: string::ToString,
+    S: Stream<Item = EVENT> + Send + 'static,
+    INTVL: Intervalable + Send + 'static,
 {
-    use futures_util::{stream, StreamExt as _};
-
     let st1 = inner.map(|event| event.to_string());
 
     let interval = option.get_interval();
     let comment_prefix = option.get_comment_prefix();
 
-    let st2 = stream::iter(0..usize::MAX)
-        .then(move |i| async move {
-            self::sleep::sleep(interval).await;
-            i
-        })
+    let st2 = intervalable_iter_stream(0..usize::MAX, INTVL::interval(interval))
         .map(move |i| format!(": {}{}\n\n", comment_prefix, i));
 
     futures_stream_select_ext::select_until_left_is_done(st1, st2).boxed()
@@ -76,19 +72,14 @@ impl KeepAliveOption {
 
 #[cfg(test)]
 mod tests {
-    #[allow(unused_imports)]
     use super::*;
 
-    #[cfg(all(
-        feature = "stream_sleep_tokio",
-        not(feature = "stream_sleep_async_timer")
-    ))]
     #[tokio::test]
-    async fn test_keep_alive_stream_with_sleep_tokio() {
+    async fn test_keep_alive_stream_with_tokio_interval() {
         use futures_util::{stream, StreamExt as _};
 
         //
-        let st = keep_alive_stream(
+        let st = keep_alive_stream::<_, _, tokio::time::Interval>(
             stream::iter(vec!["a", "b"])
                 .then(move |x| async move {
                     tokio::time::sleep(tokio::time::Duration::from_micros(2)).await;
@@ -99,11 +90,12 @@ mod tests {
         );
 
         let ret = st.collect::<Vec<_>>().await;
-
+        assert!(ret.contains(&": a\n\n".to_string()));
+        assert!(ret.contains(&": b\n\n".to_string()));
         assert!(ret.contains(&": 0\n\n".to_string()));
 
         //
-        let st = keep_alive_stream_with_option(
+        let st = keep_alive_stream_with_option::<_, _, tokio::time::Interval>(
             stream::iter(vec!["a", "b"])
                 .then(move |x| async move {
                     tokio::time::sleep(tokio::time::Duration::from_micros(2)).await;
@@ -116,7 +108,8 @@ mod tests {
         );
 
         let ret = st.collect::<Vec<_>>().await;
-
+        assert!(ret.contains(&": a\n\n".to_string()));
+        assert!(ret.contains(&": b\n\n".to_string()));
         assert!(ret.contains(&": Ping 0\n\n".to_string()));
     }
 }
