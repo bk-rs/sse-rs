@@ -36,7 +36,7 @@ where
     let st2 = intervalable_iter_stream(0..usize::MAX, INTVL::interval(interval))
         .map(move |i| format!(": {}{}\n\n", comment_prefix, i));
 
-    futures_stream_select_ext::select_until_left_is_done(st1, st2).boxed()
+    futures_stream_select_ext::select_until_left_is_done(st1, st2)
 }
 
 //

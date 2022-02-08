@@ -27,7 +27,7 @@ _priv_test_mime = ["mime"]
 http = { version = "0.2", default-features = false, optional = true }
 mime = { version = "0.3", default-features = false, optional = true }
 
-futures-util = { version = "0.3", default-features = false, features = ["std"], optional = true }
+futures-util = { version = "0.3", default-features = false, optional = true }
 futures-stream-select-ext = { version = "0.1", default-features = false, features = ["std"], optional = true }
 async-interval = { version = "0.1", default-features = false, optional = true }
 
