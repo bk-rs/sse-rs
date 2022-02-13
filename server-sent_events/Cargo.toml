@@ -16,9 +16,11 @@ readme = "README.md"
 all-features = true
 
 [features]
-default = ["stream"]
+default = ["std", "stream"]
+std = ["alloc"]
+alloc = []
 
-stream = ["futures-util", "futures-stream-select-ext", "async-interval"]
+stream = ["alloc", "futures-util", "futures-stream-select-ext", "async-interval"]
 
 _priv_test_http = ["http"]
 _priv_test_mime = ["mime"]

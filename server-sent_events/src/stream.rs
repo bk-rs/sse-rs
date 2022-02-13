@@ -1,5 +1,5 @@
+use alloc::{format, string, string::String};
 use core::time::Duration;
-use std::string;
 
 use async_interval::{intervalable_iter_stream, Intervalable};
 use futures_util::{stream::PollNext, Stream, StreamExt as _};
@@ -11,8 +11,8 @@ pub fn keep_alive_stream<EVENT, S, INTVL>(
 ) -> impl Stream<Item = String>
 where
     EVENT: string::ToString,
-    S: Stream<Item = EVENT> + Send + 'static,
-    INTVL: Intervalable + Send + 'static,
+    S: Stream<Item = EVENT>,
+    INTVL: Intervalable,
 {
     let option = KeepAliveOption::new().interval(interval);
 
@@ -25,8 +25,8 @@ pub fn keep_alive_stream_with_option<EVENT, S, INTVL>(
 ) -> impl Stream<Item = String>
 where
     EVENT: string::ToString,
-    S: Stream<Item = EVENT> + Send + 'static,
-    INTVL: Intervalable + Send + 'static,
+    S: Stream<Item = EVENT>,
+    INTVL: Intervalable,
 {
     let st1 = inner.map(|event| event.to_string());
 
@@ -70,13 +70,15 @@ impl KeepAliveOption {
     }
 
     pub fn get_comment_prefix(&self) -> String {
-        self.comment_prefix.to_owned().unwrap_or_else(|| "".into())
+        self.comment_prefix.clone().unwrap_or_else(|| "".into())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use alloc::{string::ToString as _, vec, vec::Vec};
 
     #[tokio::test]
     async fn test_keep_alive_stream_with_tokio_interval() {

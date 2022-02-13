@@ -1,5 +1,5 @@
 pub fn content_type_value_is_sse(value: &str) -> bool {
-    #[cfg(feature = "mime")]
+    #[cfg(all(feature = "std", feature = "mime"))]
     {
         if let Ok(m) = value.parse::<mime::Mime>() {
             if m.type_() == mime::TEXT && m.subtype() == mime::EVENT_STREAM {
@@ -9,13 +9,13 @@ pub fn content_type_value_is_sse(value: &str) -> bool {
 
         false
     }
-    #[cfg(not(feature = "mime"))]
+    #[cfg(not(all(feature = "std", feature = "mime")))]
     {
         value == crate::CONTENT_TYPE_VALUE
     }
 }
 
-#[cfg(feature = "http")]
+#[cfg(all(feature = "std", feature = "http"))]
 pub fn content_type_is_sse(headers: &http::HeaderMap<http::HeaderValue>) -> bool {
     if let Some(header_value) = headers.get(http::header::CONTENT_TYPE) {
         if let Ok(value) = core::str::from_utf8(header_value.as_bytes()) {
@@ -26,7 +26,7 @@ pub fn content_type_is_sse(headers: &http::HeaderMap<http::HeaderValue>) -> bool
     false
 }
 
-#[cfg(feature = "http")]
+#[cfg(all(feature = "std", feature = "http"))]
 pub fn get_last_event_id(
     headers: &http::HeaderMap<http::HeaderValue>,
 ) -> Result<Option<String>, core::str::Utf8Error> {
@@ -49,7 +49,7 @@ mod tests {
         assert!(!content_type_value_is_sse("text/plain"));
     }
 
-    #[cfg(feature = "http")]
+    #[cfg(all(feature = "std", feature = "http"))]
     #[test]
     fn test_content_type_is_sse() {
         assert!(content_type_is_sse(
@@ -71,7 +71,7 @@ mod tests {
         ));
     }
 
-    #[cfg(feature = "http")]
+    #[cfg(all(feature = "std", feature = "http"))]
     #[test]
     fn test_get_last_event_id() {
         assert_eq!(

@@ -1,3 +1,4 @@
+use alloc::{boxed::Box, vec::Vec};
 use core::fmt;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -104,6 +105,8 @@ impl fmt::Display for Event {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use alloc::{string::ToString as _, vec};
 
     #[test]
     fn test_to_string() {
