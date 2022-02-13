@@ -2,7 +2,7 @@ use core::time::Duration;
 use std::string;
 
 use async_interval::{intervalable_iter_stream, Intervalable};
-use futures_util::{Stream, StreamExt as _};
+use futures_util::{stream::PollNext, Stream, StreamExt as _};
 
 //
 pub fn keep_alive_stream<EVENT, S, INTVL>(
@@ -36,7 +36,11 @@ where
     let st2 = intervalable_iter_stream(0..usize::MAX, INTVL::interval(interval))
         .map(move |i| format!(": {}{}\n\n", comment_prefix, i));
 
-    futures_stream_select_ext::select_until_left_is_done(st1, st2)
+    futures_stream_select_ext::select_until_left_is_done_with_strategy(
+        st1,
+        st2,
+        |_: &mut PollNext| PollNext::Left,
+    )
 }
 
 //
@@ -76,7 +80,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_keep_alive_stream_with_tokio_interval() {
-        use futures_util::{stream, StreamExt as _};
+        use futures_util::stream;
 
         //
         let st = keep_alive_stream::<_, _, tokio::time::Interval>(
@@ -89,10 +93,14 @@ mod tests {
             Duration::from_micros(1),
         );
 
-        let ret = st.collect::<Vec<_>>().await;
-        assert!(ret.contains(&": a\n\n".to_string()));
-        assert!(ret.contains(&": b\n\n".to_string()));
-        assert!(ret.contains(&": 0\n\n".to_string()));
+        assert_eq!(
+            st.collect::<Vec<_>>().await,
+            vec![
+                ": a\n\n".to_string(),
+                ": 0\n\n".to_string(),
+                ": b\n\n".to_string()
+            ]
+        );
 
         //
         let st = keep_alive_stream_with_option::<_, _, tokio::time::Interval>(
@@ -107,9 +115,13 @@ mod tests {
                 .comment_prefix("Ping ".into()),
         );
 
-        let ret = st.collect::<Vec<_>>().await;
-        assert!(ret.contains(&": a\n\n".to_string()));
-        assert!(ret.contains(&": b\n\n".to_string()));
-        assert!(ret.contains(&": Ping 0\n\n".to_string()));
+        assert_eq!(
+            st.collect::<Vec<_>>().await,
+            vec![
+                ": a\n\n".to_string(),
+                ": Ping 0\n\n".to_string(),
+                ": b\n\n".to_string()
+            ]
+        );
     }
 }
