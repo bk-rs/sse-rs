@@ -76,10 +76,13 @@ impl KeepAliveOption {
 
 #[cfg(test)]
 mod tests {
+    #[allow(unused_imports)]
     use super::*;
 
+    #[allow(unused_imports)]
     use alloc::{string::ToString as _, vec, vec::Vec};
 
+    #[cfg(feature = "std")]
     #[tokio::test]
     async fn test_keep_alive_stream_with_tokio_interval() {
         use futures_util::stream;
