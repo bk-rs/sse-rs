@@ -1,5 +1,4 @@
 use alloc::{boxed::Box, vec::Vec};
-use core::fmt;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Event {
@@ -61,35 +60,35 @@ impl Event {
     }
 }
 
-impl fmt::Display for Event {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Display for Event {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         if let Some(comment) = &self.comment {
-            writeln!(f, ": {}", comment)?;
+            writeln!(f, ": {comment}")?;
         }
 
         if let Some(retry) = &self.retry {
-            writeln!(f, "retry: {}", retry)?;
+            writeln!(f, "retry: {retry}")?;
         }
 
         if let Some(id) = &self.id {
-            writeln!(f, "id: {}", id)?;
+            writeln!(f, "id: {id}")?;
         }
 
         if let Some(r#type) = &self.r#type {
-            writeln!(f, "event: {}", r#type)?;
+            writeln!(f, "event: {type}")?;
         }
 
         if let Some(data) = &self.data {
             match &data {
                 EventData::Line(s) => {
                     for x in s.lines() {
-                        writeln!(f, "data: {}", x)?;
+                        writeln!(f, "data: {x}")?;
                     }
                 }
                 &EventData::Lines(s_vec) => {
                     for s in s_vec {
                         for x in s.lines() {
-                            writeln!(f, "data: {}", x)?;
+                            writeln!(f, "data: {x}")?;
                         }
                     }
                 }

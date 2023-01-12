@@ -34,7 +34,7 @@ where
     let comment_prefix = option.get_comment_prefix();
 
     let st2 = intervalable_iter_stream(0..usize::MAX, INTVL::interval(interval))
-        .map(move |i| format!(": {}{}\n\n", comment_prefix, i));
+        .map(move |i| format!(": {comment_prefix}{i}\n\n"));
 
     futures_stream_select_ext::select_until_left_is_done_with_strategy(
         st1,
@@ -94,7 +94,7 @@ mod tests {
                     tokio::time::sleep(tokio::time::Duration::from_micros(2)).await;
                     x
                 })
-                .map(|x| format!(": {}\n\n", x)),
+                .map(|x| format!(": {x}\n\n")),
             Duration::from_micros(1),
         );
 
@@ -114,7 +114,7 @@ mod tests {
                     tokio::time::sleep(tokio::time::Duration::from_micros(2)).await;
                     x
                 })
-                .map(|x| format!(": {}\n\n", x)),
+                .map(|x| format!(": {x}\n\n")),
             KeepAliveOption::new()
                 .interval(Duration::from_micros(1))
                 .comment_prefix("Ping ".into()),
